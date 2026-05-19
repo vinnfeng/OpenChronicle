@@ -44,8 +44,20 @@ def test_write_default_creates_file(tmp_path: Path) -> None:
 
 
 def test_api_key_precedence(tmp_path: Path, monkeypatch) -> None:
+    key_file = tmp_path / "api.key"
+    key_file.write_text("from-file\n")
     monkeypatch.setenv("ENV_KEY", "from-env")
-    cfg = config.ModelConfig(api_key="direct", api_key_env="ENV_KEY")
+    cfg = config.ModelConfig(
+        api_key="direct",
+        api_key_file=str(key_file),
+        api_key_env="ENV_KEY",
+    )
     assert config.resolve_api_key(cfg) == "direct"
-    cfg2 = config.ModelConfig(api_key="", api_key_env="ENV_KEY")
+    cfg2 = config.ModelConfig(
+        api_key="",
+        api_key_file=str(key_file),
+        api_key_env="ENV_KEY",
+    )
+    assert config.resolve_api_key(cfg2) == "from-file"
+    cfg2.api_key_file = str(tmp_path / "missing.key")
     assert config.resolve_api_key(cfg2) == "from-env"

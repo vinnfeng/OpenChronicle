@@ -16,6 +16,7 @@ class ModelConfig:
     model: str = "gpt-5.4-nano"
     base_url: str = ""
     api_key: str = ""
+    api_key_file: str = ""
     api_key_env: str = "OPENAI_API_KEY"
     max_tokens: int | None = None
 
@@ -149,6 +150,13 @@ class Config:
 def resolve_api_key(cfg: ModelConfig) -> str | None:
     if cfg.api_key:
         return cfg.api_key
+    if cfg.api_key_file:
+        try:
+            key = Path(cfg.api_key_file).expanduser().read_text().strip()
+        except OSError:
+            key = ""
+        if key:
+            return key
     if cfg.api_key_env:
         return os.environ.get(cfg.api_key_env)
     return None

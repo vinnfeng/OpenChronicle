@@ -196,7 +196,8 @@ class AXWatcherProcess:
         if self._process:
             rc = self._process.wait()
             if rc == 2:
-                logger.error("Accessibility permission not granted — watcher won't restart")
-                self._stop_event.set()
+                logger.error(
+                    "Accessibility permission not granted — watcher will retry"
+                )
             elif rc != 0:
                 logger.warning("AX watcher exited with code %d", rc)
